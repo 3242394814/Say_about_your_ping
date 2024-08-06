@@ -2,8 +2,54 @@ local modname = KnownModIndex:GetModActualName("说说你的ping")
 local Widget = require "widgets/widget"
 local Image = require "widgets/image"
 local TextButton = require "widgets/textbutton"
+local my_user_name = TheNet:GetLocalUserName()
 local function Say(str)
     TheNet:Say(str)
+end
+
+local function SayPing(ping,netscore,performance) -- Ping，客户端网络性能，服务器性能
+    local netscore = netscore and netscore+1 -- LUA的Table表下标是从1开始的，所以+1
+    local performance = performance and performance+1
+
+    if GetModConfigData("Announce_Style",modname) then  -- 表情+文字
+        local function CheckEmoji(emoji) -- 检查玩家是否有这个Emoji表情
+            if TheInventory:CheckOwnership('emoji_'..emoji) then
+                return ':'..emoji..':'
+            else
+                return ''
+            end
+        end
+
+        local pingMessages = {
+            {maxPing = 0, message = STRINGS.LMB.. CheckEmoji('flex').. "无延迟 纵享丝滑~"},
+            {maxPing = 2, message = STRINGS.LMB.. CheckEmoji('beefalo').. "本地直连 Ping: %dms "},
+            {maxPing = 30, message = STRINGS.LMB.. CheckEmoji('heart').. "极低延迟: %dms 。爱了爱了！"},
+            {maxPing = 50, message = STRINGS.LMB.. CheckEmoji('web').. "低延迟: %dms 。我时刻准备着！"},
+            {maxPing = 120, message = STRINGS.LMB.. CheckEmoji('web').. "中高延迟: %dms 。高Ping战士, 请求摸鱼~"},
+            {maxPing = 500, message = STRINGS.LMB.. CheckEmoji('ghost').. "高延迟: %dms 。网络状态不佳！我无法进行战斗！"},
+            {maxPing = math.huge, message = STRINGS.LMB.. CheckEmoji('skull').. "超高延迟: %dms 。这句话发送在10分钟前！"}
+        }
+
+        local function GetPingMessage(ping)
+            for _, pingInfo in ipairs(pingMessages) do
+                if ping < pingInfo.maxPing then
+                    return string.format(pingInfo.message, ping)
+                end
+            end
+        end
+
+        local netscoreMessage_list = {"客户端网络性能：优秀","客户端网络性能：一般","客户端网络性能较差！"}
+        local performanceMessage_list = {"服务器性能：优秀","服务器性能一般","服务器性能较差！"}
+
+        local netscoreMessage = ("   " .. netscoreMessage_list[netscore]) or "" -- 客户端网络性能
+        local performanceMessage = (performance and netscore and netscore == 1 and "   但" .. performanceMessage_list[performance]) or (performance and "   " .. performanceMessage_list[performance]) or "" -- 服务器性能
+
+        local message = GetPingMessage(ping)  .. netscoreMessage .. performanceMessage -- 最终消息
+        Say(message)
+
+    else -- 仅延迟
+        Say(STRINGS.LMB.. "Ping: " ..ping.. "ms")
+    end
 end
 
 local function LoadAndSetWidgetPosition(widget, identifier)
@@ -52,11 +98,14 @@ local Ping = Class(Widget, function(self, owner)
 
     self.vip = TheNet:GetUserID() == "KU_pvwb-aTV" --我知道你想干什么
 	self.lastPingVal = nil
-	self.cd = nil
+	self.cd = nil -- 宣告CD
+    self.UpdatePingcd = nil -- 更新Ping值小部件的CD
+    self.netscore = nil -- 客户端网络性能
+    self.performance = nil -- 服务器性能
 
 	self:StartUpdating()
 
-    self.ping.OnMouseButton = function(_self, button, down, x, y)    --注意:此处应将self.drag_button替换为你要拖拽的widget
+    self.ping.OnMouseButton = function(_self, button, down, x, y)
         if button == MOUSEBUTTON_RIGHT and down then    --鼠标右键按下
             -- _self.draging = true    --标志这个widget正在被拖拽
             _self:FollowMouse()     --开启控件的鼠标跟随
@@ -72,65 +121,8 @@ local Ping = Class(Widget, function(self, owner)
     end
 
     self.ping:SetOnClick(function()
-	if not self.cd then
-        if self.vip and GetModConfigData("announce_style",modname) == "VIP" then    --作者专用
-            if self.lastPingVal < 0 then
-                Say(STRINGS.LMB.. ":flex:无延迟 纵享丝滑~")
-            elseif self.lastPingVal <= 2 then
-				Say(STRINGS.LMB.. ":beefalo:本地直连 Ping: "..TheNet:GetPing().. "ms ")
-            elseif self.lastPingVal <= 30 then
-				Say(STRINGS.LMB.. ":heart:极低延迟: " ..TheNet:GetPing().. "ms 。针不戳！")
-            elseif self.lastPingVal <= 50 then
-				Say(STRINGS.LMB.. ":web:低延迟: " ..TheNet:GetPing().. "ms 。我时刻准备着！")
-            elseif self.lastPingVal <= 99 then
-				Say(STRINGS.LMB.. ":web:中高延迟: " ..TheNet:GetPing().. "ms 。高Ping战士, 请求摸鱼~")
-            elseif self.lastPingVal <= 500 then
-				Say(STRINGS.LMB.. ":ghost:高延迟: " ..TheNet:GetPing().. "ms 。这边建议换个服主开服呢:pig:")
-            else
-				Say(STRINGS.LMB.. ":skull:超高延迟: " ..TheNet:GetPing().. "ms 。这句话发送在10分钟前！")
-            end
-
-        elseif GetModConfigData("announce_style",modname) == "VIP" then
-                Say(STRINGS.LMB.. "说说你的Ping：请切换为其他宣告样式再进行宣告")
-
-        elseif GetModConfigData("announce_style",modname) == "style" then  --表情+文字
-            if self.lastPingVal < 0 then
-                Say(STRINGS.LMB.. ":flex:无延迟 纵享丝滑~")
-            elseif self.lastPingVal <= 2 then
-				Say(STRINGS.LMB.. ":beefalo:本地直连 Ping: "..TheNet:GetPing().. "ms ")
-            elseif self.lastPingVal <= 30 then
-				Say(STRINGS.LMB.. ":heart:极低延迟: " ..TheNet:GetPing().. "ms 。爱了爱了！")
-            elseif self.lastPingVal <= 50 then
-				Say(STRINGS.LMB.. ":web:低延迟: " ..TheNet:GetPing().. "ms 。我时刻准备着！")
-            elseif self.lastPingVal <= 120 then
-				Say(STRINGS.LMB.. ":web:中高延迟: " ..TheNet:GetPing().. "ms 。高Ping战士, 请求摸鱼~")
-            elseif self.lastPingVal <= 500 then
-				Say(STRINGS.LMB.. ":ghost:高延迟: " ..TheNet:GetPing().. "ms 。网络状态不佳！我无法进行战斗！")
-            else
-				Say(STRINGS.LMB.. ":skull:超高延迟: " ..TheNet:GetPing().. "ms 。这句话发送在10分钟前！")
-            end
-
-        elseif GetModConfigData("announce_style",modname) == "text" then   --仅文字
-            if self.lastPingVal < 0 then
-                Say(STRINGS.LMB.. "无延迟 纵享丝滑~")
-            elseif self.lastPingVal <= 2 then
-				Say(STRINGS.LMB.. "本地直连 Ping: "..TheNet:GetPing().. "ms ")
-            elseif self.lastPingVal <= 30 then
-				Say(STRINGS.LMB.. "极低延迟: " ..TheNet:GetPing().. "ms 。爱了爱了！")
-            elseif self.lastPingVal <= 50 then
-				Say(STRINGS.LMB.. "低延迟: " ..TheNet:GetPing().. "ms 。我时刻准备着！")
-            elseif self.lastPingVal <= 120 then
-				Say(STRINGS.LMB.. "中高延迟: " ..TheNet:GetPing().. "ms 。高Ping战士, 请求摸鱼~")
-            elseif self.lastPingVal <= 500 then
-				Say(STRINGS.LMB.. "高延迟: " ..TheNet:GetPing().. "ms 。网络状态不佳！我无法进行战斗！")
-            else
-				Say(STRINGS.LMB.. "超高延迟: " ..TheNet:GetPing().. "ms 。这句话发送在10分钟前！")
-            end
-
-        elseif GetModConfigData("announce_style",modname) == "false" then  --仅延迟
-                Say(STRINGS.LMB.. "Ping: " ..TheNet:GetPing().. "ms")
-            end
-
+        if not self.cd then
+            SayPing(self.lastPingVal,self.netscore,self.performance) -- 宣告网络情况
 			self.cd = true
 			self.inst:DoSimTaskInTime(self.vip and 0 or 10, function() self.cd = nil end)
 		end
@@ -140,53 +132,74 @@ end)
 function Ping:OnUpdate(dt)
     local pingVal = TheNet:GetPing()
     --if pingVal < 0 then pingVal = 0 end
-    if pingVal ~= self.lastPingVal then
+    -- if pingVal ~= self.lastPingVal then
+    if not self.UpdatePingcd then
         self.lastPingVal = pingVal
+        self.UpdatePingcd = true
+        self.inst:DoSimTaskInTime(1, function() self.UpdatePingcd = nil end)
 
-        if self.lastPingVal == -1 then
+        if pingVal == -1 then
             self.ping:SetText("服务器主机")
+            self.ping:SetTextColour(0/255, 255/255, 255/255, 255/255)
         else
-            self.ping:SetText("Ping: "..pingVal)
-        end
+            -- 检测服务器性能并修改Ping的显示方式
+            local ClientObjs = TheNet:GetClientTable()
+            if ClientObjs then
+                for _, k in pairs(ClientObjs) do
+                    if k.performance ~= nil then
+                        if k.performance == 2 or k.performance == 1 then
+                            self.performance = k.performance -- 设置服务器性能
+                        else
+                            self.performance = nil
+                        end
+                    end
 
-        if GetModConfigData("color",modname) == false then
-            self.ping:SetTextColour(0.9, 0.9, 0.9, 1)
-        else
-            if self.lastPingVal < 0 then
-                self.ping:SetTextColour(0/255, 255/255, 255/255, 255/255)
-            elseif self.lastPingVal <= 50 then
-                self.ping:SetTextColour(59/255, 242/255, 99/255, 255/255)
-            elseif self.lastPingVal <= 120 then
-                self.ping:SetTextColour(222/255, 222/255, 99/255, 255/255)
+                    if k.netscore ~= nil and k.name == my_user_name then
+                        self.netscore = k.netscore -- 设置客户端网络性能
+                    end
+                end
+            end
+            if GetModConfigData("Ping_Style",modname) then
+                if (self.netscore) == 2 then -- 客户端网络性能较差
+                    self.ping:SetTextColour(242/255, 99/255, 99/255, 255/255) -- 红色
+                    self.ping:SetText("Ping: "..pingVal.."\n(网络性能较差)")
+                elseif (self.performance) == 2 then -- 服务器性能较差
+                    self.ping:SetTextColour(242/255, 99/255, 99/255, 255/255) -- 红色
+                    self.ping:SetText("Ping: "..pingVal.."\n(服务器性能较差)")
+                elseif (self.performance) == 1 then -- 服务器性能一般
+                    self.ping:SetTextColour(222/255, 222/255, 99/255, 255/255) -- 黄色
+                    self.ping:SetText("Ping: "..pingVal.."\n(服务器性能一般)")
+                elseif (self.netscore) == 1 then -- 客户端网络性能一般
+                    self.ping:SetTextColour(222/255, 222/255, 99/255, 255/255) -- 黄色
+                    self.ping:SetText("Ping: "..pingVal.."\n(网络性能一般)")
+                elseif (self.netscore) == 0 and pingVal > 50 then -- 客户端网络性能优秀,延迟>50
+                    self.ping:SetTextColour(222/255, 222/255, 99/255, 255/255) -- 黄色
+                    self.ping:SetText("Ping: "..pingVal.."\n(网络性能优秀)")
+                elseif (self.netscore) == 0 and pingVal <= 50 then -- 客户端网络性能优秀,延迟<50
+                    self.ping:SetTextColour(59/255, 242/255, 99/255, 255/255) -- 绿色
+                    self.ping:SetText("Ping: "..pingVal.."\n(网络性能优秀)")
+                else
+                    self.ping:SetText("Ping: "..pingVal) -- 默认显示状态（根据Ping来决定颜色）
+                    if pingVal <= 50 then
+                        self.ping:SetTextColour(59/255, 242/255, 99/255, 255/255) -- 绿色
+                    elseif pingVal <= 120 then
+                        self.ping:SetTextColour(222/255, 222/255, 99/255, 255/255) -- 黄色
+                    else
+                        self.ping:SetTextColour(242/255, 99/255, 99/255, 255/255) -- 红色
+                    end
+                end
             else
-                self.ping:SetTextColour(242/255, 99/255, 99/255, 255/255)
+                self.ping:SetText("Ping: "..pingVal) -- 默认显示状态（根据Ping来决定颜色）
+                if pingVal <= 50 then
+                    self.ping:SetTextColour(59/255, 242/255, 99/255, 255/255) -- 绿色
+                elseif pingVal <= 120 then
+                    self.ping:SetTextColour(222/255, 222/255, 99/255, 255/255) -- 黄色
+                else
+                    self.ping:SetTextColour(242/255, 99/255, 99/255, 255/255) -- 红色
+                end
             end
         end
     end
-
-    -- 旧版代码
-    -- if EQUIPSLOTS.BACK then
-    --     self.backpack = ThePlayer.replica.inventory:GetEquippedItem(EQUIPSLOTS.BACK)
-    -- else
-    --     self.backpack = ThePlayer.replica.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
-    -- end
-    -- if self.backpack and self.backpack.replica.container and Profile:GetIntegratedBackpack() == true then
-    --     self.ping:SetPosition(60, -87, 0)--佩戴背包且融合布局 原内容：60,-87,0
-    -- else
-    --     if GetModConfigData("Position",modname) == 1 then
-    --         self.ping:SetPosition(270, -87, 0)--分开布局（默认） 原内容：60,-30,0
-    --     else
-    --         self.ping:SetPosition(60, -30, 0)
-    --     end
-    -- end
-
-    --[[
-        ↑:使用正数的 Y 坐标值，例如 +1 表示向上移动 1 个单位。
-        ↓:使用负数的 Y 坐标值，例如 -1 表示向下移动 1 个单位。
-        ←:使用负数的 X 坐标值，例如 -1 表示向左移动 1 个单位。
-        →:使用正数的 X 坐标值，例如 +1 表示向右移动 1 个单位。
-    ]]
-
 end
 
 return Ping

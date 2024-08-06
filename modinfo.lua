@@ -3,14 +3,14 @@ description =
 [[
 开启后将在屏幕右下角显示你的Ping值，你可以点击它，点击后你的角色会在聊天中宣告你的Ping是多少。
 右键可以拖拽Ping值的显示位置
+4.1 版本更新内容：
+1.在Ping值小部件上显示客户端网络状态、服务器性能状态
+2.重写Ping的宣告内容，并支持自动识别用户是否有对应表情
+3.由于重写代码，Ping的文本颜色设置被删除了（应该也没人用白色吧？）
 
 4.0 版本更新内容：
 现在你可以直接右键拖拽Ping值小部件了！妈妈再也不用担心位置不够好了
 
-修改默认通讯频率的方法：
-1、在存档的cluster.ini的[NETWORK]下增加一行 tick_rate = 60
-2、在steam饥荒联机版通用属性中的启动选项填写 -tick_rate 60
-(填写的数字只能是15~60以内的数字)
 ]]
 author = "冰冰羊"
 version = "4.0"
@@ -36,27 +36,25 @@ configuration_options =
         default = true,
     },
     {
-        name = "color",
-        label = "文本颜色",
-        hover = "更改文本颜色",
+        name = "Ping_Style",
+        label = "Ping小部件显示内容",
+        hover = "",
         options =
         {
-            {description = "自适应", data = true},
-            {description = "仅白色", data = false},
+            {description = "延迟+客户端/服务器性能",hover = "Ping: 22(网络性能优秀)" , data = true},
+            {description = "仅延迟", hover = "Ping: 44" ,data = false},
         },
         default = true,
     },
 	{
-        name = "announce_style",
+        name = "Announce_Style",
         label = "宣告样式",
         hover = "请选择你的宣告样式",
         options =
         {
-            {description = "表情+文字",hover = "󰀗低延迟: 44ms。我时刻准备着！   解锁过的表情才能正常显示" , data = "style"},
-            {description = "仅文字", hover = "低延迟: 44ms。我时刻准备着！" ,data = "text"},
-            {description = "仅延迟", hover = "Ping:44ms" ,data = "false"},
-            {description = "作者专用", hover = "作者自己用的，普通用户请不要选择这个选项" ,data = "VIP"},
+            {description = "表情(如果有)+文字+其它",hover = "󰀗低延迟: 44ms。我时刻准备着！   解锁过的表情才会显示" , data = true},
+            {description = "仅延迟", hover = "Ping: 44ms" ,data = false},
         },
-        default = "style",
+        default = true,
     }
 }

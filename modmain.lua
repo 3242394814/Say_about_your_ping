@@ -5,7 +5,7 @@ GLOBAL.setmetatable(env, {
     end
 })
 
-if not TheNet:IsDedicated() then   --判断
+if not TheNet:IsDedicated() then -- 判断
 
 local ping = require "widgets/ping"
 local myname = TheNet:GetLocalUserName()
@@ -17,7 +17,7 @@ TUNING.MODCONFIGDATA["show_ping_client"] = true -- 其它MOD可通过这个参�
 
 AddClassPostConstruct("widgets/controls", function(self)
 	self.ping = self.bottom_root:AddChild(ping())
-	self.ping:SetPosition(575, 20)
+	self.ping:SetPosition(625, 30)
 --	self.ping.colour = GetModConfigData("color") == false and "white"
 end)
 
