@@ -24,7 +24,7 @@ name = "说说你的ping (Say about your ping)"
 description = zh_en(
 [[
 开启后将在屏幕右下角显示你的Ping值，你可以点击它，点击后你的角色会在聊天中宣告你的Ping是多少。
-右键可以拖拽Ping值的显示位置
+右键可以拖拽Ping值的显示位置。更多信息请在创意工坊上查看
 4.1 版本更新内容：
 1.在Ping值小部件上显示客户端网络状态、服务器性能状态
 2.重构Ping的宣告代码，并支持自动识别用户是否有对应表情
@@ -37,20 +37,19 @@ description = zh_en(
 ]],
 [[
 After enabling, your Ping value will be displayed at the bottom right corner of the screen. You can click on it, and your character will announce your Ping in the chat.
-Right-click to drag the display position of the Ping value.
+Right-click to drag the display position of the Ping value. More information can be found at the Creative Workshop
 
 4.1 Version Updates:
-1. Display client network status and server performance status on the Ping widget.
-2. Rewrite the Ping announcement content and support automatic recognition of whether the user has the corresponding emoji.
-3. Due to code rewrite, the Ping text color setting has been removed (no one uses white text, right?).
-4. Add English translation
-
+· Display client network status and server performance status on the Ping widget.
+· Rewrite the Ping announcement content and support automatic recognition of whether the user has the corresponding emoji.
+· Due to code rewrite, the Ping text color setting has been removed (no one uses white text, right?).
+· Add English translation
 4.0 Version Updates:
 Now you can directly drag the Ping widget with a right-click! No more worries about the position being not good enough.
 ]]
 )
 author = "冰冰羊"
-version = "4.1"
+version = "v4.1"
 priority = -2
 api_version = 10
 

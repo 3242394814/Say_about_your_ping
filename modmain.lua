@@ -111,20 +111,20 @@ if not TheNet:GetIsServer() then -- 判断当前机器是不是服务端，非�
     -- 捕获聊天信息，存在关键词就发送自己的Ping
     local oldNetworking_Say = GLOBAL.Networking_Say
     GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, ...)
-        if message == "#所有人宣告Ping" or message == "#@".. myname .. "宣告Ping" then
+        if message == "#所有人宣告Ping" or message == "#@".. myname .. " Ping" or message == "#AnnouncePingToAll" then
             --Say("我的Ping: " .. TheNet:GetPing() .. "ms")
             if TheNet:GetPing() <= 2 then
-                Say("本地直连 Ping: "..TheNet:GetPing().. "ms ")
+                Say(string.format(STRINGS.PING_LOCAL, TheNet:GetPing()))
             elseif TheNet:GetPing() <= 30 then
-                Say("极低延迟: " ..TheNet:GetPing().. "ms 。爱了爱了！")
+                Say(string.format(STRINGS.PING_LOW, TheNet:GetPing()))
             elseif TheNet:GetPing() <= 50 then
-                Say("低延迟: " ..TheNet:GetPing().. "ms 。我时刻准备着！")
+                Say(string.format(STRINGS.PING_MEDIUM, TheNet:GetPing()))
             elseif TheNet:GetPing() <= 120 then
-                Say("中高延迟: " ..TheNet:GetPing().. "ms 。高Ping战士, 请求摸鱼~")
+                Say(string.format(STRINGS.PING_HIGH, TheNet:GetPing()))
             elseif TheNet:GetPing() <= 500 then
-                Say("高延迟: " ..TheNet:GetPing().. "ms 。网络状态不佳！我无法进行战斗！")
+                Say(string.format(STRINGS.PING_VERY_HIGH, TheNet:GetPing()))
             else
-                Say("超高延迟: " ..TheNet:GetPing().. "ms 。这句话发送在10分钟前！")
+                Say(string.format(STRINGS.PING_EXTREME, TheNet:GetPing()))
             end
         end
         return oldNetworking_Say(guid, userid, name, prefab, message, ...)

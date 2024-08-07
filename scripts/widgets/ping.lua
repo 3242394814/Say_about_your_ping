@@ -49,7 +49,7 @@ local function SayPing(ping, netscore, performance) -- Ping，客户端网络性
             STRINGS.PERFORMANCE_BAD
         }
 
-        local netscoreMessage = ("   " .. netscoreMessage_list[netscore]) or "" -- 客户端网络性能
+        local netscoreMessage = netscoreMessage_list[netscore] and "   " .. netscoreMessage_list[netscore] or "" -- 客户端网络性能
         local performanceMessage = (performance and netscore and netscore == 1 and STRINGS.BUT .. performanceMessage_list[performance]) or (performance and "   " .. performanceMessage_list[performance]) or "" -- 服务器性能
 
         local message = GetPingMessage(ping) .. netscoreMessage .. performanceMessage -- 最终消息
