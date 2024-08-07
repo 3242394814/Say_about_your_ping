@@ -7,6 +7,33 @@ GLOBAL.setmetatable(env, {
 
 if not TheNet:IsDedicated() then -- 判断
 
+-- 语言检测
+
+local lang = GetModConfigData("lang") or "auto"
+if lang == "auto" then
+    lang = GLOBAL.LanguageTranslator.defaultlang
+end
+
+local chinese_languages =
+{
+    zh = "zh", -- Chinese for Steam
+    zhr = "zh", -- Chinese for WeGame
+    ch = "zh", -- Chinese mod
+    chs = "zh", -- Chinese mod
+    sc = "zh", -- simple Chinese
+    zht = "zh", -- traditional Chinese for Steam
+	tc = "zh", -- traditional Chinese
+	cht = "zh", -- Chinese mod
+}
+
+if chinese_languages[lang] ~= nil then
+    lang = chinese_languages[lang]
+else
+    lang = "en"
+end
+
+modimport("languages/"..lang..".lua") -- 加载翻译文件
+
 local ping = require "widgets/ping"
 local myname = TheNet:GetLocalUserName()
 local function Say(str)
@@ -17,7 +44,7 @@ TUNING.MODCONFIGDATA["show_ping_client"] = true -- 其它MOD可通过这个参�
 
 AddClassPostConstruct("widgets/controls", function(self)
 	self.ping = self.bottom_root:AddChild(ping())
-	self.ping:SetPosition(625, 30)
+	self.ping:SetPosition(625, 35)
 --	self.ping.colour = GetModConfigData("color") == false and "white"
 end)
 
