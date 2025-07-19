@@ -1,0 +1,208 @@
+local modname = debug.getinfo(1).source:match("%.%./mods/([^/]+)/")
+local Widget = require "widgets/widget"
+local Image = require "widgets/image"
+local TextButton = require "widgets/textbutton"
+local my_user_name = TheNet:GetLocalUserName()
+local function Say(str)
+    TheNet:Say(str)
+end
+
+local function SayPing(ping, netscore, performance) -- Ping，客户端网络性能，服务器性能
+    local netscore = netscore and netscore + 1 -- LUA的Table表下标是从1开始的，所以+1
+    local performance = performance and performance + 1
+
+    if GetModConfigData("Announce_Style", modname) then -- 表情+文字
+        local function CheckEmoji(emoji) -- 检查玩家是否有这个Emoji表情
+            if TheInventory:CheckOwnership('emoji_' .. emoji) then
+                return ':' .. emoji .. ':'
+            else
+                return ''
+            end
+        end
+
+        local pingMessages = {
+            {maxPing = 0, message = CheckEmoji('flex') .. STRINGS.PING_NO_DELAY },
+            {maxPing = 2, message = CheckEmoji('beefalo') .. STRINGS.PING_LOCAL },
+            {maxPing = 30, message = CheckEmoji('heart') .. STRINGS.PING_LOW },
+            {maxPing = 50, message = CheckEmoji('web') .. STRINGS.PING_MEDIUM },
+            {maxPing = 120, message = CheckEmoji('web') .. STRINGS.PING_HIGH },
+            {maxPing = 500, message = CheckEmoji('ghost') .. STRINGS.PING_VERY_HIGH },
+            {maxPing = math.huge, message = CheckEmoji('skull') .. STRINGS.PING_EXTREME }
+        }
+
+        local function GetPingMessage(ping)
+            for _, pingInfo in ipairs(pingMessages) do
+                if ping < pingInfo.maxPing then
+                    return string.format(pingInfo.message, ping)
+                end
+            end
+        end
+
+        local netscoreMessage_list = {
+            STRINGS.NETSCORE_GOOD,
+            STRINGS.NETSCORE_OKAY,
+            STRINGS.NETSCORE_BAD
+        }
+        local performanceMessage_list = {
+            STRINGS.PERFORMANCE_GOOD,
+            STRINGS.PERFORMANCE_OKAY,
+            STRINGS.PERFORMANCE_BAD
+        }
+
+        local netscoreMessage = netscoreMessage_list[netscore] and "   " .. netscoreMessage_list[netscore] or "" -- 客户端网络性能
+        local performanceMessage = (performance and netscore and netscore == 1 and STRINGS.BUT .. performanceMessage_list[performance]) or (performance and "   " .. performanceMessage_list[performance]) or "" -- 服务器性能
+
+        local message = GetPingMessage(ping) .. netscoreMessage .. performanceMessage -- 最终消息
+        Say(message)
+
+    else -- 仅延迟
+        Say(STRINGS.LMB.. "Ping: " ..ping.. "ms")
+    end
+end
+
+local function LoadAndSetWidgetPosition(widget, identifier)
+    local data = {}
+
+    -- 从文件中加载数据
+    TheSim:GetPersistentString("Say_about_your_ping.json", function(load_success, str)
+        if load_success and string.len(str) > 0 then
+            data = json.decode(str) or {}
+        else
+            print("[说说你的Ping] 未成功读取到数据记录文件，恢复Ping小部件至默认位置")
+        end
+
+        -- 获取特定控件的位置信息
+        local widget_data = data[identifier]
+        if widget_data then
+            widget:SetPosition(widget_data.x, widget_data.y)
+        end
+    end)
+end
+
+local function SaveData(identifier, data)
+    local save_data = LoadAndSetWidgetPosition() or {}
+    save_data[identifier] = data
+    -- 保存数据到本地文件
+    TheSim:SetPersistentString("Say_about_your_ping.json", json.encode(save_data))
+end
+
+local function SaveWidgetPosition(widget, identifier)
+    if not widget then return end
+
+    local pos = widget:GetPosition()
+    -- 将位置保存到文件中
+    SaveData(identifier, { x = pos.x, y = pos.y })
+end
+
+
+local Ping = Class(Widget, function(self, owner)
+    Widget._ctor(self, "Ping")
+    self.root = self:AddChild(Widget("root"))
+
+    self.ping = self.root:AddChild(TextButton())
+    -- self.ping:SetPosition(60, -30, 0)
+    self.ping:SetFont(NUMBERFONT)
+    self.ping:SetTextSize(40)
+
+    self.vip = TheNet:GetUserID() == "KU_pvwb-aTV" --我知道你想干什么
+    self.lastPingVal = nil
+    self.cd = nil -- 宣告CD
+    self.netscore = nil -- 客户端网络性能
+    self.performance = nil -- 服务器性能
+
+    self:StartUpdating()
+
+    self.ping.OnMouseButton = function(_self, button, down, x, y)
+        if button == MOUSEBUTTON_RIGHT and down then    --鼠标右键按下
+            -- _self.draging = true    --标志这个widget正在被拖拽
+            _self:FollowMouse()     --开启控件的鼠标跟随
+        elseif button == MOUSEBUTTON_RIGHT then            --鼠标右键抬起
+            _self:StopFollowMouse()        --停止控件的跟随
+            SaveWidgetPosition(_self, "Position")
+        end
+    end
+
+    -- 初始化小部件位置
+    if GetModConfigData("remember", modname) then
+        LoadAndSetWidgetPosition(self.ping, "Position")
+    end
+
+    self.ping:SetOnClick(function()
+        if not self.cd then
+            SayPing(self.lastPingVal, self.netscore, self.performance) -- 宣告网络情况
+            self.cd = true
+            self.inst:DoSimTaskInTime(self.vip and 0 or 10, function() self.cd = nil end)
+        end
+    end)
+end)
+
+function Ping:OnUpdate(dt)
+    local pingVal = TheNet:GetPing()
+    if pingVal ~= self.lastPingVal then
+        self.lastPingVal = pingVal
+
+        if pingVal == -1 then
+            self.ping:SetText(STRINGS.PING_SERVER)
+            self.ping:SetTextColour(0 / 255, 255 / 255, 255 / 255, 255 / 255)
+        else
+            -- 检测服务器性能并修改Ping的显示方式
+            local ClientObjs = TheNet:GetClientTable()
+            if ClientObjs then
+                for _, k in pairs(ClientObjs) do
+                    if k.performance ~= nil then
+                        if k.performance == 2 or k.performance == 1 then
+                            self.performance = k.performance -- 设置服务器性能
+                        else
+                            self.performance = nil
+                        end
+                    end
+
+                    if k.netscore ~= nil and k.name == my_user_name then
+                        self.netscore = k.netscore -- 设置客户端网络性能
+                    end
+                end
+            end
+            if GetModConfigData("Ping_Style", modname) then
+                if (self.netscore) == 2 then -- 客户端网络性能较差
+                    self.ping:SetTextColour(242 / 255, 99 / 255, 99 / 255, 255 / 255) -- 红色
+                    self.ping:SetText("Ping: "..pingVal .. "\n" .. STRINGS.PING_NETSCORE_BAD)
+                elseif (self.performance) == 2 then -- 服务器性能较差
+                    self.ping:SetTextColour(242 / 255, 99 / 255, 99 / 255, 255 / 255) -- 红色
+                    self.ping:SetText("Ping: "..pingVal .. "\n" .. STRINGS.PING_PERFORMANCE_BAD)
+                elseif (self.performance) == 1 then -- 服务器性能一般
+                    self.ping:SetTextColour(222 / 255, 222 / 255, 99 / 255, 255 / 255) -- 黄色
+                    self.ping:SetText("Ping: "..pingVal .. "\n" .. STRINGS.PING_PERFORMANCE_OKAY)
+                elseif (self.netscore) == 1 then -- 客户端网络性能一般
+                    self.ping:SetTextColour(222 / 255, 222 / 255, 99 / 255, 255 / 255) -- 黄色
+                    self.ping:SetText("Ping: "..pingVal .. "\n" .. STRINGS.PING_NETSCORE_OKAY)
+                elseif (self.netscore) == 0 and pingVal > 50 then -- 客户端网络性能优秀,延迟>50
+                    self.ping:SetTextColour(222 / 255, 222 / 255, 99 / 255, 255 / 255) -- 黄色
+                    self.ping:SetText("Ping: "..pingVal .. "\n" .. STRINGS.PING_NETSCORE_GOOD)
+                elseif (self.netscore) == 0 and pingVal <= 50 then -- 客户端网络性能优秀,延迟<50
+                    self.ping:SetTextColour(59 / 255, 242 / 255, 99 / 255, 255 / 255) -- 绿色
+                    self.ping:SetText("Ping: "..pingVal .. "\n" .. STRINGS.PING_NETSCORE_GOOD)
+                else
+                    self.ping:SetText("Ping: "..pingVal) -- 默认显示状态（根据Ping来决定颜色）
+                    if pingVal <= 50 then
+                        self.ping:SetTextColour(59 / 255, 242 / 255, 99 / 255, 255 / 255) -- 绿色
+                    elseif pingVal <= 120 then
+                        self.ping:SetTextColour(222 / 255, 222 / 255, 99 / 255, 255 / 255) -- 黄色
+                    else
+                        self.ping:SetTextColour(242 / 255, 99 / 255, 99 / 255, 255 / 255) -- 红色
+                    end
+                end
+            else
+                self.ping:SetText("Ping: "..pingVal) -- 默认显示状态（根据Ping来决定颜色）
+                if pingVal <= 50 then
+                    self.ping:SetTextColour(59 / 255, 242 / 255, 99 / 255, 255 / 255) -- 绿色
+                elseif pingVal <= 120 then
+                    self.ping:SetTextColour(222 / 255, 222 / 255, 99 / 255, 255 / 255) -- 黄色
+                else
+                    self.ping:SetTextColour(242 / 255, 99 / 255, 99 / 255, 255 / 255) -- 红色
+                end
+            end
+        end
+    end
+end
+
+return Ping
