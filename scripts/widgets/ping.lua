@@ -68,7 +68,7 @@ local function LoadAndSetWidgetPosition(widget, identifier)
         if load_success and string.len(str) > 0 then
             data = json.decode(str) or {}
         else
-            print("[说说你的Ping] 加载数据文件失败，恢复Ping小部件至默认位置")
+            print("[说说你的Ping] 未成功读取到数据记录文件，恢复Ping小部件至默认位置")
         end
 
         -- 获取特定控件的位置信息
@@ -139,12 +139,8 @@ end)
 
 function Ping:OnUpdate(dt)
     local pingVal = TheNet:GetPing()
-    --if pingVal < 0 then pingVal = 0 end
-    -- if pingVal ~= self.lastPingVal then
-    if not self.UpdatePingcd then
+    if pingVal ~= self.lastPingVal then
         self.lastPingVal = pingVal
-        self.UpdatePingcd = true
-        self.inst:DoSimTaskInTime(1, function() self.UpdatePingcd = nil end)
 
         if pingVal == -1 then
             self.ping:SetText(STRINGS.PING_SERVER)
