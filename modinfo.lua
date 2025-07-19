@@ -20,7 +20,7 @@ local function zh_en(zh, en)  -- Other languages don't work
     return lang ~= "zh" and en or zh
 end
 
-name = "说说你的ping (Say about your ping)"
+name = zh_en("说说你的ping", "Say about your ping")
 description = zh_en(
 [[
 开启后将在屏幕右下角显示你的Ping值，你可以点击它，点击后你的角色会在聊天中宣告你的Ping是多少。

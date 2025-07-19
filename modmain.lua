@@ -39,8 +39,9 @@ local myname = TheNet:GetLocalUserName()
 local function Say(str)
     TheNet:Say(str)
 end
-TUNING.MODCONFIGDATA = {}
-TUNING.MODCONFIGDATA["show_ping_client"] = true -- 其它MOD可通过这个参数判断此MOD是否开启
+
+TUNING.SAYABOUTYOURPING_MODCONFIGDATA = {}
+TUNING.SAYABOUTYOURPING_MODCONFIGDATA["show_ping_client"] = true -- 其它MOD可通过这个参数判断此MOD是否开启
 
 AddClassPostConstruct("widgets/controls", function(self)
 	self.ping = self.bottom_root:AddChild(ping())

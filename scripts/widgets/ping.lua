@@ -1,4 +1,4 @@
-local modname = KnownModIndex:GetModActualName("说说你的ping (Say about your ping)")
+local modname = debug.getinfo(1).source:match("%.%./mods/([^/]+)/")
 local Widget = require "widgets/widget"
 local Image = require "widgets/image"
 local TextButton = require "widgets/textbutton"
