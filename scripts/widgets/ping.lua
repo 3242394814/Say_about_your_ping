@@ -1,6 +1,6 @@
 local modname = debug.getinfo(1).source:match("%.%./mods/([^/]+)/")
 local Widget = require "widgets/widget"
-local Image = require "widgets/image"
+-- local Image = require "widgets/image"
 local TextButton = require "widgets/textbutton"
 local my_user_name = TheNet:GetLocalUserName()
 local function Say(str)
@@ -109,6 +109,7 @@ local Ping = Class(Widget, function(self, owner)
     self.cd = nil -- 宣告CD
     self.netscore = nil -- 客户端网络性能
     self.performance = nil -- 服务器性能
+    self.need_update = true -- 需要更新显示数据
 
     self:StartUpdating()
 
@@ -139,29 +140,32 @@ end)
 function Ping:OnUpdate(dt)
     local pingVal = TheNet:GetPing()
     if pingVal ~= self.lastPingVal then
+        self.need_update = true
+    end
+
+    local ClientObjs = TheNet:GetClientTable()
+    if type(ClientObjs) == "table" then
+        for _, k in pairs(ClientObjs) do
+            if k.performance ~= nil then
+                self.performance = k.performance -- 设置服务器性能
+                self.need_update = true
+            end
+
+            if k.netscore ~= nil and k.name == my_user_name then
+                self.netscore = k.netscore -- 设置客户端网络性能
+                self.need_update = true
+            end
+        end
+    end
+
+    if self.need_update then
         self.lastPingVal = pingVal
+        self.need_update = false
 
         if pingVal == -1 then
             self.ping:SetText(STRINGS.PING_SERVER)
             self.ping:SetTextColour(0 / 255, 255 / 255, 255 / 255, 255 / 255)
         else
-            -- 检测服务器性能并修改Ping的显示方式
-            local ClientObjs = TheNet:GetClientTable()
-            if ClientObjs then
-                for _, k in pairs(ClientObjs) do
-                    if k.performance ~= nil then
-                        if k.performance == 2 or k.performance == 1 then
-                            self.performance = k.performance -- 设置服务器性能
-                        else
-                            self.performance = nil
-                        end
-                    end
-
-                    if k.netscore ~= nil and k.name == my_user_name then
-                        self.netscore = k.netscore -- 设置客户端网络性能
-                    end
-                end
-            end
             if GetModConfigData("Ping_Style", modname) then
                 if (self.netscore) == 2 then -- 客户端网络性能较差
                     self.ping:SetTextColour(242 / 255, 99 / 255, 99 / 255, 255 / 255) -- 红色

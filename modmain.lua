@@ -48,8 +48,8 @@ local function canactive()
 end
 
 
-if GetModConfigData("showping_key") then
-    mykey = _G[GetModConfigData("showping_key")]
+if GetModConfigData("showping_key") ~= -1 then
+    local mykey = _G[GetModConfigData("showping_key")]
     TheInput:AddKeyDownHandler(mykey, function()   --第一步，监听键盘事件，客户端按下按键后发送请求1
         if not canactive() or TheInput:IsKeyDown(GLOBAL.KEY_CTRL) then return end --编辑内容和按住Ctrl时不起效
         if TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then --当Shift和自定义键同时按下时才有用
