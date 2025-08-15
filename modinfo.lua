@@ -32,7 +32,7 @@ Right-click to drag the display position of the Ping value. More information/Cha
 ]]
 )
 author = "冰冰羊"
-version = "4.1.2"
+version = "4.1.3"
 priority = -2
 api_version = 10
 

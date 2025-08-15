@@ -148,7 +148,7 @@ function Ping:OnUpdate(dt)
     if type(ClientObjs) == "table" then
         for _, k in pairs(ClientObjs) do
             if k.performance ~= nil then
-                self.performance = k.performance -- 设置服务器性能
+                self.performance = type(k.performance) == "number" and k.performance > 0 and k.performance or nil -- 设置服务器性能，优秀时为nil，因为不需要宣告
                 self.need_update = true
             end
 
