@@ -40,7 +40,7 @@ to check a specific player's Ping.
 ]]
 )
 author = "冰冰羊"
-version = "4.3.2"
+version = "4.3.3"
 priority = -3
 api_version = 10
 
