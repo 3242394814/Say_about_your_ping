@@ -32,7 +32,7 @@ Right-click to drag the display position of the Ping value. More information/Cha
 ]]
 )
 author = "冰冰羊"
-version = "4.1.3"
+version = "4.2.2"
 priority = -2
 api_version = 10
 
@@ -57,7 +57,7 @@ configuration_options =
     },
     {
         name = "remember",
-        label = zh_en("记住你设置的Ping的显示位置？", "Remember the set Ping display position?"),
+        label = zh_en("记住你设置的Ping的显示位置？", "Remember Ping position?"),
         hover = zh_en("如果你设置到了奇怪的地方 可以关闭此选项来复原位置\n这样就可以重新设置位置了，模组依然会保存你最后设置的位置", "If you set it to a strange place, you can turn off this option to restore the position\nYou can reset the position, and the mod will still save your last set position"),
         options =
         {

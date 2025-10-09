@@ -5,7 +5,7 @@ GLOBAL.setmetatable(env, {
     end
 })
 
-if not TheNet:IsDedicated() then -- 判断
+if TheNet:IsDedicated() then return end -- 判断
 
 -- 语言检测
 
@@ -36,8 +36,40 @@ modimport("languages/"..lang..".lua") -- 加载翻译文件
 
 local ping = require "widgets/ping"
 local myname = TheNet:GetLocalUserName()
+local last_say
 local function Say(str)
     TheNet:Say(str)
+    last_say = GetTime()
+end
+
+-- 捕获聊天信息，存在关键词就发送自己的Ping
+if not TheNet:GetIsServer() then -- 判断当前机器是不是服务端，非服务端才能执行这个代码，否则崩溃
+    local oldNetworking_Say = GLOBAL.Networking_Say
+    GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, ...)
+        local low_str = string.lower(message)
+        if low_str == "#所有人宣告ping" or
+            low_str == "#@".. myname .. " ping" or
+            low_str == STRINGS.LMB .. ' ' .. "#@".. myname .. " ping" or -- 兼容快捷宣告(NoMu)触发的，如果有人想在自定义宣告中触发本模组的指令
+            low_str == "#allping"
+        then
+            if not last_say or GetTime() - last_say > 10 then
+                if TheNet:GetPing() <= 2 then
+                    Say(string.format(STRINGS.SAYABOUTYOURPING.PING_LOCAL, TheNet:GetPing()))
+                elseif TheNet:GetPing() <= 30 then
+                    Say(string.format(STRINGS.SAYABOUTYOURPING.PING_LOW, TheNet:GetPing()))
+                elseif TheNet:GetPing() <= 50 then
+                    Say(string.format(STRINGS.SAYABOUTYOURPING.PING_MEDIUM, TheNet:GetPing()))
+                elseif TheNet:GetPing() <= 120 then
+                    Say(string.format(STRINGS.SAYABOUTYOURPING.PING_HIGH, TheNet:GetPing()))
+                elseif TheNet:GetPing() <= 500 then
+                    Say(string.format(STRINGS.SAYABOUTYOURPING.PING_VERY_HIGH, TheNet:GetPing()))
+                else
+                    Say(string.format(STRINGS.SAYABOUTYOURPING.PING_EXTREME, TheNet:GetPing()))
+                end
+            end
+        end
+        return oldNetworking_Say(guid, userid, name, prefab, message, ...)
+    end
 end
 
 TUNING.SAYABOUTYOURPING_MODCONFIGDATA = {}
@@ -107,29 +139,3 @@ local function ModFollowMouse(self)
     end
 end
 AddClassPostConstruct("widgets/widget", ModFollowMouse)
-
-if not TheNet:GetIsServer() then -- 判断当前机器是不是服务端，非服务端才能执行这个代码，否则崩溃
-    -- 捕获聊天信息，存在关键词就发送自己的Ping
-    local oldNetworking_Say = GLOBAL.Networking_Say
-    GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, ...)
-        if message == "#所有人宣告Ping" or message == "#@".. myname .. " Ping" or message == "#AnnouncePingToAll" then
-            --Say("我的Ping: " .. TheNet:GetPing() .. "ms")
-            if TheNet:GetPing() <= 2 then
-                Say(string.format(STRINGS.PING_LOCAL, TheNet:GetPing()))
-            elseif TheNet:GetPing() <= 30 then
-                Say(string.format(STRINGS.PING_LOW, TheNet:GetPing()))
-            elseif TheNet:GetPing() <= 50 then
-                Say(string.format(STRINGS.PING_MEDIUM, TheNet:GetPing()))
-            elseif TheNet:GetPing() <= 120 then
-                Say(string.format(STRINGS.PING_HIGH, TheNet:GetPing()))
-            elseif TheNet:GetPing() <= 500 then
-                Say(string.format(STRINGS.PING_VERY_HIGH, TheNet:GetPing()))
-            else
-                Say(string.format(STRINGS.PING_EXTREME, TheNet:GetPing()))
-            end
-        end
-        return oldNetworking_Say(guid, userid, name, prefab, message, ...)
-    end
-end
-
-end
