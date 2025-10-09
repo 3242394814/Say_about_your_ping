@@ -25,22 +25,25 @@ description = zh_en(
 [[
 开启后将在屏幕右下角显示你的Ping值，你可以点击它，点击后你的角色会在聊天中宣告你的Ping是多少。
 右键可以拖拽Ping值的显示位置
-
-按下Shift+自定义快捷键（默认是“  [  ”键）查询当前世界所有玩家的Ping
-聊天发送：#所有人宣告Ping、#@XXX Ping 查询指定玩家的Ping
+在计分板中可以看到其他玩家的Ping值
+使用聊天指令：#所有人宣告ping #allping #@某某某 ping 可以让其它玩家宣告出自己的Ping
 
 模组更新日志请前往创意工坊查看
 ]],
 [[
-After enabling it, your Ping value will be displayed in the bottom right corner of the screen.  You can click on it, and your character will announce your Ping in the chat.  You can right-click to drag the Ping display to a different location.
+When enabled, this mod displays your Ping value at the bottom right corner of the screen. You can click it to make your character announce their current Ping in the chat.
+Right-click to drag and reposition the Ping display.
+You can also view other players'Ping values on the scoreboard.
 
-Press Shift + the custom shortcut key (default is the ' [ ' key) to check the Ping of players in the same world as you.
-Chat commands: #AnnouncePingToAll, #@XXX Ping (e.g. #@冰冰羊 Ping)
-to check a specific player's Ping.
+Use the following chat commands:
+#allping or #@username ping
+— to make other players announce their own Ping.
+
+For the mod's update log, please visit the Steam Workshop page.
 ]]
 )
 author = "冰冰羊"
-version = "4.3.3"
+version = "4.4"
 priority = -3
 api_version = 10
 
@@ -81,7 +84,7 @@ configuration_options =
     },
     {
         name = "remember",
-        label = zh_en("记住你设置的Ping的显示位置？", "Remember the set Ping display position?"),
+        label = zh_en("记住你设置的Ping的显示位置？", "Remember Ping position?"),
         hover = zh_en("如果你设置到了奇怪的地方 可以关闭此选项来复原位置\n这样就可以重新设置位置了，模组依然会保存你最后设置的位置", "If you set it to a strange place, you can turn off this option to restore the position\nYou can reset the position, and the mod will still save your last set position"),
         options =
         {
@@ -111,14 +114,5 @@ configuration_options =
             {description = zh_en("仅延迟", "Only Ping"), hover = "Ping: 44ms", data = false},
         },
         default = true,
-    },
-    {
-        name = "showping_key",
-        label = zh_en("查询Ping按键","Query Ping button"),
-        hover = zh_en("按下Shift+此按键后，所有玩家的Ping会显示在聊天栏中","After pressing Shift+this button, all players' Ping will be displayed in the chat bar"),
-        options = keylist,
-        is_keylist = true, -- 兼容Lazy Controls模组
-        is_keybind = true, -- 兼容配置扩展模组
-        default = "KEY_LEFTBRACKET",
     },
 }
