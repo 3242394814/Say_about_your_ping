@@ -51,6 +51,7 @@ local playerstatusscreen
 AddClientModRPCHandler("show_ping", "sync_ping",function(userid, ping)
     player_pings[userid] = ping
     if playerstatusscreen and playerstatusscreen.scroll_list then
+        if not playerstatusscreen.scroll_list.inst:IsValid() then return end
         playerstatusscreen.scroll_list:RefreshView() -- 刷新一次计分板数据
     end
 end)
