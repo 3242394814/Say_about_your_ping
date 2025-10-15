@@ -46,7 +46,7 @@ end
 if not TheNet:GetIsServer() then -- 判断当前机器是不是服务端，非服务端才能执行这个代码，否则崩溃
     local oldNetworking_Say = GLOBAL.Networking_Say
     GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, ...)
-        local low_str = string.lower(message)
+        local low_str = string.lower(message or "")
         if low_str == "#所有人宣告ping" or
             low_str == "#@".. myname .. " ping" or
             low_str == STRINGS.LMB .. ' ' .. "#@".. myname .. " ping" or -- 兼容快捷宣告(NoMu)触发的，如果有人想在自定义宣告中触发本模组的指令
