@@ -127,8 +127,8 @@ local function ModFollowMouse(self)
         return Vector3(mouse_pos.x/ scale.x, mouse_pos.y/ scale.y, mouse_pos.z/ scale.z)    --鼠标相对于UI父级坐标的局部坐标
     end
 
-    --修改官方的鼠标跟随，以适应所有情况(垃圾科雷)
-    self.FollowMouse = function(_self)
+    --定义自己的鼠标跟随，以适应所有情况(垃圾科雷)
+    self.BBGoat_FollowMouse = function(_self)
         if _self.followhandler == nil then
             _self.followhandler = TheInput:AddMoveHandler(function(x, y)
                 local loc_pos = GetMouseLocalPos(_self, Vector3(x, y, 0))    --主要是将原本的x,y坐标进行了坐标系的转换，使用转换后的坐标来更新widget位置

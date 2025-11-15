@@ -117,7 +117,7 @@ local Ping = Class(Widget, function(self, owner)
     self.ping.OnMouseButton = function(_self, button, down, x, y)
         if button == MOUSEBUTTON_RIGHT and down then    --鼠标右键按下
             -- _self.draging = true    --标志这个widget正在被拖拽
-            _self:FollowMouse()     --开启控件的鼠标跟随
+            _self:BBGoat_FollowMouse()     --开启控件的鼠标跟随
         elseif button == MOUSEBUTTON_RIGHT then            --鼠标右键抬起
             _self:StopFollowMouse()        --停止控件的跟随
             SaveWidgetPosition(_self, "Position")
