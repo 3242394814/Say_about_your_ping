@@ -43,7 +43,7 @@ For the mod's update log, please visit the Steam Workshop page.
 ]]
 )
 author = "冰冰羊"
-version = "4.4.2"
+version = "4.4.4"
 version_compatible = "4.4"
 priority = -3
 api_version = 10
@@ -87,6 +87,17 @@ configuration_options =
         name = "remember",
         label = zh_en("记住你设置的Ping的显示位置？", "Remember Ping position?"),
         hover = zh_en("如果你设置到了奇怪的地方 可以关闭此选项来复原位置\n这样就可以重新设置位置了，模组依然会保存你最后设置的位置", "If you set it to a strange place, you can turn off this option to restore the position\nYou can reset the position, and the mod will still save your last set position"),
+        options =
+        {
+            {description = zh_en("是", "Yes"), hover = "" , data = true},
+            {description = zh_en("否", "No"), hover = "", data = false},
+        },
+        default = true,
+    },
+    {
+        name = "Sync_Ping",
+        label = zh_en("共享Ping值", "Shared Ping"),
+        hover = zh_en("开启后所有玩家的Ping值都可在计分板中查看（可能会消耗一部分服务器性能）", "When enabled, all players' ping values can be viewed on the scoreboard (may consume some server performance)."),
         options =
         {
             {description = zh_en("是", "Yes"), hover = "" , data = true},

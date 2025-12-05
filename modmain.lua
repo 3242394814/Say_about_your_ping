@@ -62,61 +62,63 @@ if TheNet:IsDedicated() then return end
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-modimport("scripts/utils/bbgoat_utils") -- 加载我的工具
+if GetModConfigData("Sync_Ping") then -- 检查是否开启“共享Ping值”
+    modimport("scripts/utils/bbgoat_utils") -- 加载我的工具
 
--- 将Ping值显示在计分板内
-AddClassPostConstruct("screens/playerstatusscreen", function(self)
-    local old_DoInit = self.DoInit
-    function self:DoInit(...)
-        old_DoInit(self, ...)
+    -- 将Ping值显示在计分板内
+    AddClassPostConstruct("screens/playerstatusscreen", function(self)
+        local old_DoInit = self.DoInit
+        function self:DoInit(...)
+            old_DoInit(self, ...)
 
-        if not self.scroll_list.sayaboutyourping_old_update then
-            -- 滚动列表时刷新
-            if self.scroll_list and self.scroll_list.updatefn then
-                self.scroll_list.sayaboutyourping_old_update = self.scroll_list.updatefn
-                self.scroll_list.updatefn = function(playerListing, client, i, ...)
-                    self.scroll_list.sayaboutyourping_old_update(playerListing, client, i, ...)
-                    if not playerListing.shown then return end
-                    if client.netscore ~= nil then
-                        local perf_id = math.min(client.netscore + 1, 3)
-                        local ping = player_pings[playerListing.userid]
-                        if ping and perf_id and not playerListing.ishost then
-                            playerListing.perf:SetHoverText(STRINGS.UI.PLAYERSTATUSSCREEN.PERF_CLIENT_LEVELS[perf_id] .. "\tPing: ".. ping .."ms")
+            if not self.scroll_list.sayaboutyourping_old_update then
+                -- 滚动列表时刷新
+                if self.scroll_list and self.scroll_list.updatefn then
+                    self.scroll_list.sayaboutyourping_old_update = self.scroll_list.updatefn
+                    self.scroll_list.updatefn = function(playerListing, client, i, ...)
+                        self.scroll_list.sayaboutyourping_old_update(playerListing, client, i, ...)
+                        if not playerListing.shown then return end
+                        if client.netscore ~= nil then
+                            local perf_id = math.min(client.netscore + 1, 3)
+                            local ping = player_pings[playerListing.userid]
+                            if ping and perf_id and not playerListing.ishost then
+                                playerListing.perf:SetHoverText(STRINGS.UI.PLAYERSTATUSSCREEN.PERF_CLIENT_LEVELS[perf_id] .. "\tPing: ".. ping .."ms")
+                            end
                         end
                     end
                 end
+
+                self.scroll_list:RefreshView()
+
+                playerstatusscreen = self
             end
-
-            self.scroll_list:RefreshView()
-
-            playerstatusscreen = self
-        end
-    end
-end)
-
--- 临时修改快捷宣告(NoMu)宣告预设
-AddSimPostInit(function()
-    TheGlobalInstance:DoTaskInTime(0.1,function()
-        if not rawget(_G, "NOMU_QA") then return end
-        GLOBAL.NOMU_QA.DATA.SCHEMES[1].data.PLAYER.FORMATS.PERF = string.gsub(GLOBAL.NOMU_QA.DATA.SCHEMES[1].data.PLAYER.FORMATS.PERF, "。{PING}", "")
-        GLOBAL.NOMU_QA.SCHEME.PLAYER.FORMATS.PERF = string.gsub(GLOBAL.NOMU_QA.SCHEME.PLAYER.FORMATS.PERF, "。{PING}", "")
-    end)
-end)
-
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
--- Ping值变化时发送RPC同步至服务器
-local lastPingVal
-MOD_util:AddPlayerPostInit(function(world, player)
-    if player ~= ThePlayer then return end
-    player:DoPeriodicTask(1, function()
-        local pingVal = TheNet:GetPing()
-        if lastPingVal ~= pingVal then
-            SendModRPCToServer(MOD_RPC["show_ping"]["send_ping"], pingVal)
-            lastPingVal = pingVal
         end
     end)
-end)
+
+    -- 临时修改快捷宣告(NoMu)宣告预设
+    AddSimPostInit(function()
+        TheGlobalInstance:DoTaskInTime(0.1,function()
+            if not rawget(_G, "NOMU_QA") then return end
+            GLOBAL.NOMU_QA.DATA.SCHEMES[1].data.PLAYER.FORMATS.PERF = string.gsub(GLOBAL.NOMU_QA.DATA.SCHEMES[1].data.PLAYER.FORMATS.PERF, "。{PING}", "")
+            GLOBAL.NOMU_QA.SCHEME.PLAYER.FORMATS.PERF = string.gsub(GLOBAL.NOMU_QA.SCHEME.PLAYER.FORMATS.PERF, "。{PING}", "")
+        end)
+    end)
+
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    -- Ping值变化时发送RPC同步至服务器
+    local lastPingVal
+    MOD_util:AddPlayerPostInit(function(world, player)
+        if player ~= ThePlayer then return end
+        player:DoPeriodicTask(1, function()
+            local pingVal = TheNet:GetPing()
+            if lastPingVal ~= pingVal then
+                SendModRPCToServer(MOD_RPC["show_ping"]["send_ping"], pingVal)
+                lastPingVal = pingVal
+            end
+        end)
+    end)
+end
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
