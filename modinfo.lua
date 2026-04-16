@@ -32,7 +32,7 @@ Right-click to drag the display position of the Ping value. More information/Cha
 ]]
 )
 author = "冰冰羊"
-version = "4.2.5"
+version = "4.2.6"
 priority = -2
 api_version = 10
 
@@ -54,6 +54,7 @@ configuration_options =
             {description = zh_en("自动", "Auto"), data = "auto", hover = zh_en("根据游戏语言自动设置", "Automatically set according to the game language")},
         },
         default = "auto",
+        client = true,
     },
     {
         name = "remember",
@@ -65,6 +66,19 @@ configuration_options =
             {description = zh_en("否", "No"), hover = "", data = false},
         },
         default = true,
+        client = true,
+    },
+    {
+        name = "Chat_Command",
+        label = zh_en("允许其他人使用聊天命令", "Allow Chat Commands"),
+        hover = zh_en("开启后其他玩家可以使用聊天命令让你发送Ping值", "When enabled, other players can use chat commands to make you send your ping."),
+        options =
+        {
+            {description = zh_en("是", "Yes"), hover = "" , data = true},
+            {description = zh_en("否", "No"), hover = "", data = false},
+        },
+        default = true,
+        client = true,
     },
     {
         name = "Ping_Style",
@@ -76,6 +90,7 @@ configuration_options =
             {description = zh_en("仅延迟", "Only Ping"), hover = "Ping: 44" , data = false},
         },
         default = true,
+        client = true,
     },
     {
         name = "Announce_Style",
@@ -87,5 +102,6 @@ configuration_options =
             {description = zh_en("仅延迟", "Only Ping"), hover = "Ping: 44ms", data = false},
         },
         default = true,
+        client = true,
     },
 }
