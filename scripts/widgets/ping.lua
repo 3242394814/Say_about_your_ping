@@ -11,7 +11,7 @@ local function SayPing(ping, netscore, performance, packetloss, whisper) -- Ping
     local netscore = netscore and netscore + 1 -- LUA的Table表下标是从1开始的，所以+1
     local performance = performance and performance + 1
 
-    if GetModConfigData("Announce_Style", modname) then -- 表情+文字
+    if GetModConfigData("Announce_Style", modname, true) then -- 表情+文字
         local function CheckEmoji(emoji) -- 检查玩家是否有这个Emoji表情
             if TheInventory:CheckOwnership('emoji_' .. emoji) then
                 return ':' .. emoji .. ':'
@@ -125,7 +125,7 @@ local Ping = Class(Widget, function(self, owner)
     end
 
     -- 初始化小部件位置
-    if GetModConfigData("remember", modname) then
+    if GetModConfigData("remember", modname, true) then
         LoadAndSetWidgetPosition(self.ping, "Position")
     end
 
@@ -193,7 +193,7 @@ function Ping:OnUpdate(dt)
             end
             local ping_text = "Ping: " .. pingVal .. "ms"
             local packetloss_text = STRINGS.SAYABOUTYOURPING.PACKETLOSS .. packetloss .. "%"
-            if GetModConfigData("Ping_Style", modname) then
+            if GetModConfigData("Ping_Style", modname, true) then
                 if (self.netscore) == 2 then -- 客户端网络性能较差
                     self.ping:SetTextColour(COLOUR.RED)
                     self.ping:SetText(ping_text .. "\n" .. (packetloss > 0 and packetloss_text or STRINGS.SAYABOUTYOURPING.PING_NETSCORE_BAD))

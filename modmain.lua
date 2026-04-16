@@ -6,7 +6,7 @@ GLOBAL.setmetatable(env, {
 })
 
 -- 语言检测
-local lang = GetModConfigData("lang") or "auto"
+local lang = GetModConfigData("lang", true) or "auto"
 if lang == "auto" then
     lang = GLOBAL.LanguageTranslator.defaultlang
 end
@@ -137,7 +137,7 @@ local function Say(str)
 end
 
 -- 捕获聊天信息，存在关键词就发送自己的Ping
-if not TheNet:GetIsServer() then -- 判断当前机器是不是服务端，非服务端才能执行这个代码，否则崩溃
+if not TheNet:GetIsServer() and GetModConfigData("Chat_Command", true) then -- 判断当前机器是不是服务端，非服务端才能执行这个代码，否则崩溃
     local oldNetworking_Say = GLOBAL.Networking_Say
     GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, ...)
         local low_str = string.lower(message or "")
