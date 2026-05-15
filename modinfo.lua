@@ -43,7 +43,7 @@ For the mod's update log, please visit the Steam Workshop page.
 ]]
 )
 author = "冰冰羊"
-version = "4.4.5"
+version = "4.4.6"
 version_compatible = "4.4"
 priority = -3
 api_version = 10
@@ -57,8 +57,8 @@ server_filter_tags =
     "Say about your ping(Server) "..version
 }
 
-icon_atlas = "atlas-0.xml"
-icon = "atlas-0.tex"
+icon_atlas = "modicon.xml"
+icon = "modicon.tex"
 
 
 local keys = {"TAB","KP_DIVIDE","KP_MULTIPLY","KP_MINUS","KP_PLUS","KP_ENTER","KP_EQUALS","MINUS","EQUALS","SPACE","ENTER",--[["ESCAPE",]]"HOME","INSERT","DELETE","END","PAUSE","PRINT","CAPSLOCK","SCROLLOCK","RSHIFT","LSHIFT","RCTRL","LCTRL","RALT","LALT","LSUPER","RSUPER","ALT","CTRL","SHIFT","BACKSPACE","PERIOD","SLASH","SEMICOLON","LEFTBRACKET","BACKSLASH","RIGHTBRACKET","TILDE","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","UP","DOWN","RIGHT","LEFT","PAGEUP","PAGEDOWN","0","1","2","3","4","5","6","7","8","9"}

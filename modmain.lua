@@ -33,8 +33,19 @@ modimport("languages/"..lang..".lua") -- 加载翻译文件
 
 local player_pings = {} -- 存储玩家的Ping值
 
+local function printinvalid(rpcname, player)
+    print(string.format("[Say about your ping(Server)] Invalid %s RPC from (%s) %s", rpcname, player.userid or "", player.name or ""))
+
+    --This event is for MODs that want to handle players sending invalid rpcs
+    TheWorld:PushEvent("invalidrpc", { player = player, rpcname = rpcname })
+end
+
 -- 服务器：将接收到的数据转发给其它人
 AddModRPCHandler("show_ping","send_ping", function(player, ping)
+    if not checknumber(ping) then
+        printinvalid("send_ping", player)
+        return
+    end
     SendModRPCToShard(SHARD_MOD_RPC["show_ping"]["send_ping"], nil, player.userid, ping)
     SendModRPCToClient(CLIENT_MOD_RPC["show_ping"]["sync_ping"], nil, player.userid, ping)
 end)
@@ -63,7 +74,7 @@ if TheNet:IsDedicated() then return end
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 if GetModConfigData("Sync_Ping") then -- 检查是否开启“共享Ping值”
-    modimport("scripts/utils/bbgoat_utils") -- 加载我的工具
+    modimport("utils") -- 加载我的工具
 
     -- 将Ping值显示在计分板内
     AddClassPostConstruct("screens/playerstatusscreen", function(self)
