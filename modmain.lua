@@ -139,7 +139,15 @@ if TUNING.SAYABOUTYOURPING_MODCONFIGDATA["show_ping_client"] then
     return
 end
 
-local ping = require "widgets/ping"
+local function Import(modulename)
+	local f = GLOBAL.kleiloadlua(modulename)
+	if f and type(f) == "function" then
+        GLOBAL.setfenv(f, GLOBAL)
+        return f()
+	end
+end
+
+local ping = Import(MODROOT .. "ping.lua")
 local myname = TheNet:GetLocalUserName()
 local last_say
 local function Say(str)
