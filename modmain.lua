@@ -32,6 +32,7 @@ end
 modimport("languages/"..lang..".lua") -- 加载翻译文件
 
 local player_pings = {} -- 存储玩家的Ping值
+rawset(GLOBAL, "SayAboutYourPing_PlayerPings", player_pings) -- 允许其它模组获取Ping值数据
 
 local function printinvalid(rpcname, player)
     print(string.format("[Say about your ping(Server)] Invalid %s RPC from (%s) %s", rpcname, player.userid or "", player.name or ""))
@@ -104,15 +105,6 @@ if GetModConfigData("Sync_Ping") then -- 检查是否开启“共享Ping值”
                 playerstatusscreen = self
             end
         end
-    end)
-
-    -- 临时修改快捷宣告(NoMu)宣告预设
-    AddSimPostInit(function()
-        TheGlobalInstance:DoTaskInTime(0.1,function()
-            if not rawget(_G, "NOMU_QA") then return end
-            GLOBAL.NOMU_QA.DATA.SCHEMES[1].data.PLAYER.FORMATS.PERF = string.gsub(GLOBAL.NOMU_QA.DATA.SCHEMES[1].data.PLAYER.FORMATS.PERF, "。{PING}", "")
-            GLOBAL.NOMU_QA.SCHEME.PLAYER.FORMATS.PERF = string.gsub(GLOBAL.NOMU_QA.SCHEME.PLAYER.FORMATS.PERF, "。{PING}", "")
-        end)
     end)
 
     ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

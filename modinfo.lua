@@ -43,7 +43,7 @@ For the mod's update log, please visit the Steam Workshop page.
 ]]
 )
 author = "冰冰羊"
-version = "4.4.7-a"
+version = "4.4.8"
 version_compatible = "4.4"
 priority = -3
 api_version = 10
